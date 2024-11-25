@@ -3,7 +3,7 @@
   <img src="./img/icon.svg" width="128" alt="Simplexity Logo" width=600px>
 </p>
 
-<h1 align="center">🚀 Simplexity - The simple Perplexity AI Desktop App</h1>
+<h1 align="center">:rocket: Simplexity - The simple Perplexity AI Desktop App</h1>
 
 ---
 
@@ -17,7 +17,7 @@
 
 ---
 
-## ✨ Features
+## :sparkles: Features
 
 - **Just works**: Open Perplexity and is just it.
 - **Persistent window state**: If the window is on primary display, stay on primary. If the window is small, stay small. Simple.
@@ -25,11 +25,11 @@
 
 ---
 
-## 📦 Releases
+## :package: Releases
 
 Download the latest releases for Linux on [releases section](https://github.com/Wiselabs/simplexity/releases).
 
-## 🗃️ License
+## :scroll: License
 
 This project is licensed under the BSD3 License.
 
@@ -38,7 +38,28 @@ This project is licensed under the BSD3 License.
 
 ---
 
-## 💡 Support and Donations
+## :hammer: Build
+This application is written in JavaScript (just one source file), using Node 20 and Electron 33. In order to install dependencies, execute:
+
+```sh
+npm install
+```
+
+To run application, execute:
+
+```sh
+npm run start
+```
+
+To package application in `AppImage` format, run:
+
+```sh
+npm run pack-linux
+```
+
+---
+
+## :call_me_hand: Support and Donations
 
 If you find this project helpful, consider supporting us. Your contributions help maintain and improve the Simplexity.
 
@@ -48,7 +69,7 @@ If you find this project helpful, consider supporting us. Your contributions hel
 
 ---
 
-## 🙌 Feedback and Suggestions
+## :handshake: Feedback and Suggestions
 
 We welcome your feedback and suggestions to improve the Simplexity. Please share your thoughts through GitHub issues or contact us directly.
 
