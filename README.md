@@ -34,3 +34,29 @@ Download the latest releases for Linux on [releases section](https://github.com/
 This project is licensed under the BSD3 License.
 
 ---
+> **Note**: This application is not affiliated with the official Perplexity AI project but is an independent effort to bring it to your desktop.
+
+---
+
+## 💡 Support and Donations
+
+If you find this project helpful, consider supporting us. Your contributions help maintain and improve the Simplexity.
+
+<p align="center">
+  <a href="https://www.buymeacoffee.com/franklin8" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" style="height: 60px !important;width: 217px !important;" ></a>
+</p>
+
+---
+
+## 🙌 Feedback and Suggestions
+
+We welcome your feedback and suggestions to improve the Simplexity. Please share your thoughts through GitHub issues or contact us directly.
+
+<div align="center">
+  <p><b>Made with ❤️ by</b></p>
+  <a href="https://www.wiselabs.com.br/">
+    <img src="./img/logo_wiselabs.svg" alt="Made with love by Wiselabs" width="70px">
+  </a>
+</div>
+
+---
