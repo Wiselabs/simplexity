@@ -1,0 +1,39 @@
+{
+  "name": "simplexity",
+  "version": "1.0.0",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "start": "electron .",
+    "pack-linux": "electron-builder --linux",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "perplexity",
+    "ai",
+    "desktop",
+    "app"
+  ],
+  "author": "Wiselabs Software",
+  "license": "BSD-3-Clause",
+  "description": "",
+  "devDependencies": {
+    "electron": "^33.2.0",
+    "electron-builder": "^25.1.8"
+  },
+  "build": {
+    "appId": "br.com.wiselabs.Simplexity",
+    "productName": "Simplexity",
+    "directories": {
+      "output": "release-builds"
+    },
+    "linux": {
+      "target": "AppImage",
+      "icon": "./img/icon.png",
+      "category": "Office"
+    }
+  },
+  "dependencies": {
+    "electron-window-state": "^5.0.3"
+  }
+}
