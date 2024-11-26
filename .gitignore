@@ -5,3 +5,4 @@ node_modules
 *.idea
 release-builds
 generated-sources.json
+.DS_Store

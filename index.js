@@ -1,5 +1,9 @@
 import {app, BrowserWindow, Menu, shell} from 'electron';
 import windowStateKeeper from 'electron-window-state';
+import path from 'path';
+import { fileURLToPath } from "url";
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const createWindow = () => {
     let mainWindowState = windowStateKeeper({
@@ -23,17 +27,17 @@ const createWindow = () => {
         if (aboutWindow == null) {
             aboutWindow = new BrowserWindow({
                 width: 450,
-                height: 380,
+                height: 550,
                 show: false,
                 minimizable: false,
                 maximizable: false,
                 parent: win
             });
-            aboutWindow.setIcon('img/icon.png');
+            aboutWindow.setIcon(path.join(__dirname, 'img/icon.png'));
 
             aboutWindow.removeMenu();
 
-            aboutWindow.loadFile('about.html');
+            aboutWindow.loadFile(path.join(__dirname, 'about.html'));
             aboutWindow.webContents.on('dom-ready', () => {
                 aboutWindow.webContents.executeJavaScript(`document.getElementById('version').innerHTML = '${app.getVersion()}';`);
                 aboutWindow.show();
@@ -118,9 +122,8 @@ const createWindow = () => {
     ];
 
     Menu.setApplicationMenu(Menu.buildFromTemplate(appMenu));
-    win.setIcon('img/icon.png');
-    win.loadURL("https://perplexity.ai");
-    win.setTitle("Simplexity");
+    win.setIcon(path.join(__dirname, 'img/icon.png'));
+    win.setTitle(app.getName() + ' - ' + app.getVersion());
 
     win.on('did-start-navigation', function () {
         session.defaultSession.cookies.flushStore();
@@ -130,6 +133,9 @@ const createWindow = () => {
         session.defaultSession.cookies.flushStore();
     });
     mainWindowState.manage(win);
+    win.on('show', () => {
+        win.loadURL("https://perplexity.ai");
+    });
 }
 
 app.whenReady().then(() => {

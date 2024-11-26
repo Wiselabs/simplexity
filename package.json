@@ -4,9 +4,12 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
+    "clean": "rm -Rf release-builds",
     "dist": "electron-builder",
     "start": "electron .",
     "pack-linux": "electron-builder --linux",
+    "pack-win": "electron-builder --win=portable",
+    "pack-mac": "CSC_IDENTITY_AUTO_DISCOVERY=false electron-builder --mac --universal",
     "pack-with-nm-src": "yarn install && mkdir -p release-builds && rm -f generated-sources.json && flatpak-node-generator yarn -r yarn.lock && rm -f release-builds/${npm_package_name}-${npm_package_version}-src-with_node_modules.tar.gz && tar czvf release-builds/${npm_package_name}-${npm_package_version}-src-with_node_modules.tar.gz img node_modules yarn.lock README.md index.js package.json generated-sources.json",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -33,9 +36,19 @@
       "target": "AppImage",
       "icon": "./img/icon.png",
       "category": "Office"
+    },
+    "mac": {
+      "target": "dmg",
+      "category": "your.app.Productivity",
+      "icon": "./img/icon.icns"
+    },
+    "win": {
+      "icon": "./img/icon.ico",
+      "sign": false
     }
   },
   "dependencies": {
-    "electron-window-state": "^5.0.3"
+    "electron-window-state": "^5.0.3",
+    "path": "^0.12.7"
   }
 }
