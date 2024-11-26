@@ -27,7 +27,26 @@
 
 ## :package: Releases
 
-Download the latest releases for Linux on [releases section](https://github.com/Wiselabs/simplexity/releases).
+Download the latest releases for Linux, macOS or Windows on [releases section](https://github.com/Wiselabs/simplexity/releases).
+
+---
+
+## How to install
+### :penguin: Linux
+- Download the `AppImage` file in [releases section](https://github.com/Wiselabs/simplexity/releases);
+- Mark file as executable. You can do it by KDE/GNOME interface on file properties, or executing `chmod +x Simplexity*.AppImage`;
+- Run it. :godmode:
+
+### :apple: macOS
+
+- Download the `DMG` file in [releases section](https://github.com/Wiselabs/simplexity/releases);
+- Drag Simplexity to your Applications folder;
+- Try open it, then [allow unidentified developer app](https://support.apple.com/guide/mac-help/open-a-mac-app-from-an-unknown-developer-mh40616/mac);
+- Run. :suspect:
+
+### :tv: Windows
+- Download the `EXE` file in [releases section](https://github.com/Wiselabs/simplexity/releases);
+- Double click. This is it. No emotion, no challenge, no funny. :finnadie:
 
 ## :scroll: License
 
