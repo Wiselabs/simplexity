@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright 2024 Franklin Ronald -->
+<component type="desktop-application">
+    <id>br.com.wiselabs.simplexity</id>
+    <metadata_license>0BSD</metadata_license>
+    <project_license>BSD-3-Clause</project_license>
+    <name>Simplexity</name>
+    <summary>Simple desktop app for Perplexity.AI</summary>
+    <developer id="br.com.wiselabs">
+        <name>Wiselabs Software</name>
+    </developer>
+    <description>
+        <p>The non-nonsense simple desktop app for Perplexity AI. It's just work, no magic, no tray, no scripts injected and nothing obfuscated.</p>
+        <p>
+            This simple project was motivated by the fact that when developers searched for a simple Desktop application for Perplexity.AI,
+            they came across "fake open-source" applications, meaning there were obfuscated codes injected and suspicious traffic when running them.
+            And it was precisely for this reason that we decided to create this simple and transparent application, with no injected scripts and only a
+            single JavaScript file that is easy for the community to audit.
+        </p>
+        <ul>
+            <li>Safe;</li>
+            <li>Can navigate between Perplexity.AI and Perplexity Labs by menu;</li>
+            <li>Just works.</li>
+        </ul>
+    </description>
+    <launchable type="desktop-id">br.com.wiselabs.simplexity.desktop</launchable>
+    <categories>
+        <category>Office</category>
+        <category>Network</category>
+    </categories>
+    <keywords>
+        <keyword>Perplexity.AI</keyword>
+        <keyword>search</keyword>
+        <keyword>chatbot</keyword>
+        <keyword>ai</keyword>
+    </keywords>
+    <screenshots>
+        <screenshot type="default">
+            <caption>Screenshot main window</caption>
+            <image>
+                https://raw.githubusercontent.com/Wiselabs/simplexity/v1.0.1/img/screenshot.png
+            </image>
+        </screenshot>
+    </screenshots>
+    <content_rating type="oars-1.1" />
+    <url type="homepage">https://github.com/Wiselabs/simplexity</url>
+    <url type="bugtracker">https://github.com/Wiselabs/simplexity/issues</url>
+    <url type="donation">https://buymeacoffee.com/franklin8</url>
+    <releases>
+      <release version="1.0.1" date="2024-11-26">
+        <description>
+            <ul>
+                <li>Add menu action to open Perplexity Labs</li>
+                <li>New about window</li>
+            </ul>
+        </description>
+      </release>
+    </releases>
+</component>

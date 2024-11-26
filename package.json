@@ -5,12 +5,12 @@
   "type": "module",
   "scripts": {
     "clean": "rm -Rf release-builds",
-    "dist": "electron-builder",
+    "dist": "yarn run clean && yarn run pack-linux && cp -Rf release-builds/linux-unpacked release-builds/simplexity-linux-x86_64 && cp -Rf img metadata release-builds/simplexity-linux-x86_64/ && cd release-builds && tar czvf ${npm_package_name}-${npm_package_version}-linux-x86_64.tar.gz simplexity-linux-x86_64 && sha256sum ${npm_package_name}-${npm_package_version}-linux-x86_64.tar.gz > ${npm_package_name}-${npm_package_version}-linux-x86_64.tar.gz.sha256sum && cd -",
     "start": "electron .",
     "pack-linux": "electron-builder --linux",
     "pack-win": "electron-builder --win=portable",
     "pack-mac": "CSC_IDENTITY_AUTO_DISCOVERY=false electron-builder --mac --universal",
-    "pack-with-nm-src": "yarn install && mkdir -p release-builds && rm -f generated-sources.json && flatpak-node-generator yarn -r yarn.lock && rm -f release-builds/${npm_package_name}-${npm_package_version}-src-with_node_modules.tar.gz && tar czvf release-builds/${npm_package_name}-${npm_package_version}-src-with_node_modules.tar.gz img node_modules yarn.lock README.md index.js package.json generated-sources.json",
+    "pack-with-nm-src": "yarn install && mkdir -p release-builds && rm -f generated-sources.json && flatpak-node-generator yarn -r yarn.lock && rm -f release-builds/${npm_package_name}-${npm_package_version}-src-with_node_modules.tar.gz && tar czvf release-builds/${npm_package_name}-${npm_package_version}-src-with_node_modules.tar.gz metadata img node_modules yarn.lock README.md index.js package.json generated-sources.json",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [
