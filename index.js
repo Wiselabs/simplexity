@@ -133,9 +133,7 @@ const createWindow = () => {
         session.defaultSession.cookies.flushStore();
     });
     mainWindowState.manage(win);
-    win.on('show', () => {
-        win.loadURL("https://perplexity.ai");
-    });
+    win.loadURL("https://perplexity.ai");
 }
 
 app.whenReady().then(() => {
