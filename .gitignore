@@ -4,3 +4,4 @@ node_modules
 *.iml
 *.idea
 release-builds
+generated-sources.json
