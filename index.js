@@ -121,6 +121,27 @@ const createWindow = () => {
         }
     ];
 
+    const openNewUrl = function(url, e) {
+        if(
+            url !== null &&
+            url.indexOf("perplexity.ai") < 0 &&
+            url.indexOf("accounts.google.com") < 0 &&
+            url.indexOf("appleid.apple.com") < 0
+        ) {
+            if(typeof e !== "undefined" && e !== null) {
+                e.preventDefault();
+            }
+            shell.openExternal(url);
+            return { action: 'deny' };
+        } else {
+            return { action: 'allow' };
+        }
+    }
+
+    const handleRedirect = (e, url) => {
+        openNewUrl(url, e);
+    }
+
     Menu.setApplicationMenu(Menu.buildFromTemplate(appMenu));
     win.setIcon(path.join(__dirname, 'img/icon.png'));
     win.setTitle(app.getName() + ' - ' + app.getVersion());
@@ -132,6 +153,34 @@ const createWindow = () => {
     win.on('did-navigate', function () {
         session.defaultSession.cookies.flushStore();
     });
+
+    win.webContents.on('context-menu', (event, params) => {
+        const menu = Menu.buildFromTemplate([
+            {
+                label: 'Copy',
+                role: 'copy',
+                enabled: params.selectionText.trim().length > 0,
+            },
+            {
+                label: 'Cut',
+                role: 'cut',
+                enabled: params.editFlags.canCut,
+            },
+            {
+                label: 'Paste',
+                role: 'paste',
+                enabled: params.editFlags.canPaste,
+            },
+        ]);
+
+        menu.popup(win);
+    });
+    win.webContents.on('will-navigate', handleRedirect);
+    win.webContents.on('new-window', handleRedirect);
+    win.webContents.setWindowOpenHandler(({ url }) => {
+        return openNewUrl(url);
+    });
+
     mainWindowState.manage(win);
     win.loadURL("https://perplexity.ai");
 }
