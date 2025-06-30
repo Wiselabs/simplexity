@@ -1,0 +1,12 @@
+[Desktop Entry]
+Version=1.2
+Type=Application
+Name=Simplexity
+GenericName=Perplexity.AI app
+Comment=Simple and safe Perplexity.AI desktop client
+Exec=simplexity
+Icon=br.com.wiselabs.simplexity
+Categories=Office;Network;
+StartupWMClass=br.com.wiselabs.simplexity.desktop
+Keywords=perplexity;ai;chatbot;
+
