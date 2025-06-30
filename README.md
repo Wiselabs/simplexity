@@ -59,6 +59,12 @@ Download Simplexity from `Flathub`. Or if you prefer, use the `AppImage`.
 - Download the `EXE` file in [releases section](https://github.com/Wiselabs/simplexity/releases);
 - Double click. This is it. No emotion, no challenge, no funny. :finnadie:
 
+## :microphone: Simplexity on media
+
+- https://www.linuxlinks.com/machine-learning-linux-simplexity-simple-perplexity-ai-desktop-app/
+- https://www.edivaldobrito.com.br/como-instalar-o-simplexity-no-linux-via-flatpak/
+- https://sempreupdate.com.br/instale-o-simplexity-no-ubuntu-fedora-debian-e-outras-distribuicoes-linux-com-flatpak/
+
 ## :scroll: License
 
 This project is licensed under the BSD3 License.
