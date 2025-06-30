@@ -1,7 +1,8 @@
-import {app, BrowserWindow, Menu, shell} from 'electron';
+import {app, BrowserWindow, Menu, ipcMain, nativeTheme, shell, clipboard} from 'electron';
 import windowStateKeeper from 'electron-window-state';
 import path from 'path';
-import { fileURLToPath } from "url";
+import {fileURLToPath} from "url";
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
@@ -42,10 +43,10 @@ const createWindow = () => {
                 aboutWindow.webContents.executeJavaScript(`document.getElementById('version').innerHTML = '${app.getVersion()}';`);
                 aboutWindow.show();
             });
-            aboutWindow.webContents.setWindowOpenHandler(({ url }) => {
+            aboutWindow.webContents.setWindowOpenHandler(({url}) => {
                 // open url in a browser and prevent default
                 shell.openExternal(url);
-                return { action: 'deny' };
+                return {action: 'deny'};
             });
             aboutWindow.on('closed', () => {
                 aboutWindow = null;
@@ -54,6 +55,19 @@ const createWindow = () => {
             aboutWindow.focus();
         }
     }
+
+    ipcMain.handle('dark-mode:toggle', () => {
+        if (nativeTheme.shouldUseDarkColors) {
+            nativeTheme.themeSource = 'light';
+        } else {
+            nativeTheme.themeSource = 'dark';
+        }
+        return nativeTheme.shouldUseDarkColors;
+    });
+
+    ipcMain.handle('dark-mode:system', () => {
+        nativeTheme.themeSource = 'system';
+    });
 
     // Menu
     const appMenu = [
@@ -93,6 +107,15 @@ const createWindow = () => {
             ]
         },
         {
+            label: 'View',
+            submenu: [
+                { role: 'zoomIn' },
+                { role: 'zoomOut' },
+                { type: 'separator' },
+                { role: 'resetZoom' }
+            ]
+        },
+        {
             label: 'Help',
             submenu: [
                 {
@@ -121,20 +144,20 @@ const createWindow = () => {
         }
     ];
 
-    const openNewUrl = function(url, e) {
-        if(
+    const openNewUrl = function (url, e) {
+        if (
             url !== null &&
             url.indexOf("perplexity.ai") < 0 &&
             url.indexOf("accounts.google.com") < 0 &&
             url.indexOf("appleid.apple.com") < 0
         ) {
-            if(typeof e !== "undefined" && e !== null) {
+            if (typeof e !== "undefined" && e !== null) {
                 e.preventDefault();
             }
             shell.openExternal(url);
-            return { action: 'deny' };
+            return {action: 'deny'};
         } else {
-            return { action: 'allow' };
+            return {action: 'allow'};
         }
     }
 
@@ -171,13 +194,18 @@ const createWindow = () => {
                 role: 'paste',
                 enabled: params.editFlags.canPaste,
             },
+            {
+                label: 'Copy Link',
+                visible: !!params.linkURL,
+                click: () => clipboard.writeText(params.linkURL)
+            }
         ]);
 
         menu.popup(win);
     });
     win.webContents.on('will-navigate', handleRedirect);
     win.webContents.on('new-window', handleRedirect);
-    win.webContents.setWindowOpenHandler(({ url }) => {
+    win.webContents.setWindowOpenHandler(({url}) => {
         return openNewUrl(url);
     });
 
