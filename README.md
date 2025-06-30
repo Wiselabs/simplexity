@@ -32,7 +32,18 @@ Download the latest releases for Linux, macOS or Windows on [releases section](h
 ---
 
 ## How to install
+Download Simplexity from `Flathub`. Or if you prefer, use the `AppImage`.
+
 ### :penguin: Linux
+
+#### Flathub (Recommended)
+<p align="center">
+    <a href='https://flathub.org/apps/br.com.wiselabs.simplexity'>
+        <img width='240' alt='Get it on Flathub' src='https://flathub.org/api/badge?locale=en'/>
+    </a>
+</p>
+
+#### AppImage
 - Download the `AppImage` file in [releases section](https://github.com/Wiselabs/simplexity/releases);
 - Mark file as executable. You can do it by KDE/GNOME interface on file properties, or executing `chmod +x Simplexity*.AppImage`;
 - Run it. :godmode:
