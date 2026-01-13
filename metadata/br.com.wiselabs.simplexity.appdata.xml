@@ -42,18 +42,27 @@
             </image>
         </screenshot>
     </screenshots>
-    <content_rating type="oars-1.1" />
+    <content_rating type="oars-1.1"/>
     <url type="homepage">https://github.com/Wiselabs/simplexity</url>
     <url type="bugtracker">https://github.com/Wiselabs/simplexity/issues</url>
     <url type="donation">https://buymeacoffee.com/franklin8</url>
     <releases>
-      <release version="1.0.1" date="2024-11-26">
-        <description>
-            <ul>
-                <li>Add menu action to open Perplexity Labs</li>
-                <li>New about window</li>
-            </ul>
-        </description>
-      </release>
+        <release version="1.1.0" date="2025-07-02">
+            <description>
+                <ul>
+                    <li>Open sources in default browser;</li>
+                    <li>Copy link support;</li>
+                    <li>Zoom in, zoom out and reset zoom support.</li>
+                </ul>
+            </description>
+        </release>
+        <release version="1.0.1" date="2024-11-26">
+            <description>
+                <ul>
+                    <li>Add menu action to open Perplexity Labs</li>
+                    <li>New about window</li>
+                </ul>
+            </description>
+        </release>
     </releases>
 </component>

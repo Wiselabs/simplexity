@@ -17,7 +17,8 @@ const createWindow = () => {
         width: mainWindowState.width,
         height: mainWindowState.height,
         webPreferences: {
-            partition: 'persist:simplexity'
+            partition: 'persist:simplexity',
+            spellcheck: true
         }
     });
 
