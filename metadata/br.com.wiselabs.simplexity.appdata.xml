@@ -47,6 +47,13 @@
     <url type="bugtracker">https://github.com/Wiselabs/simplexity/issues</url>
     <url type="donation">https://buymeacoffee.com/franklin8</url>
     <releases>
+        <release version="1.1.1" date="2026-01-13">
+            <description>
+                <ul>
+                    <li>Enable spellchecker.</li>
+                </ul>
+            </description>
+        </release>
         <release version="1.1.0" date="2025-07-02">
             <description>
                 <ul>
