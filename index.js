@@ -1,4 +1,4 @@
-import {app, BrowserWindow, Menu, ipcMain, nativeTheme, shell, clipboard} from 'electron';
+import {app, BrowserWindow, Menu, MenuItem, ipcMain, nativeTheme, shell, clipboard} from 'electron';
 import windowStateKeeper from 'electron-window-state';
 import path from 'path';
 import {fileURLToPath} from "url";
@@ -298,6 +298,23 @@ const createWindow = () => {
                 click: () => clipboard.writeText(params.linkURL)
             }
         ]);
+        if(params.dictionarySuggestions) {
+            menu.append(new MenuItem({type: 'separator'}));
+            for (const suggestion of params.dictionarySuggestions) {
+                menu.append(new MenuItem({
+                    label: suggestion,
+                    click: () => win.webContents.replaceMisspelling(suggestion)
+                }))
+            }
+        }
+        if (params.misspelledWord) {
+            menu.append(
+                new MenuItem({
+                    label: 'Add to dictionary',
+                    click: () => myWindow.webContents.session.addWordToSpellCheckerDictionary(params.misspelledWord)
+                })
+            )
+        }
 
         menu.popup(win);
     });
