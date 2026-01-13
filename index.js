@@ -298,7 +298,7 @@ const createWindow = () => {
                 click: () => clipboard.writeText(params.linkURL)
             }
         ]);
-        if(params.dictionarySuggestions) {
+        if(params.dictionarySuggestions && params.dictionarySuggestions.length > 0) {
             menu.append(new MenuItem({type: 'separator'}));
             for (const suggestion of params.dictionarySuggestions) {
                 menu.append(new MenuItem({
