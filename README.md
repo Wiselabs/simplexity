@@ -87,10 +87,22 @@ To run application, execute:
 npm run start
 ```
 
-To package application in `AppImage` format, run:
+To pack application in `AppImage` format for Linux, run:
 
 ```sh
 npm run pack-linux
+```
+
+To pack application in `dmg` format for macOS, run:
+
+```sh
+npm run pack-mac
+```
+
+To pack application in `exe` format for Windows, run:
+
+```sh
+npm run pack-win
 ```
 
 ---
