@@ -22,6 +22,85 @@ const createWindow = () => {
         }
     });
 
+    let currentRequestId = 0;  // Para rastrear
+
+    const execSearch = () => {
+        const parentBounds = win.getBounds();
+        const searchWidth = 450;
+        const searchHeight = 140;
+        const x = parentBounds.x + (parentBounds.width - searchWidth) / 2;
+        const y = parentBounds.y + (parentBounds.height - searchHeight) / 2;
+        const searchWin = new BrowserWindow({
+            parent: win,
+            modal: true,
+            title: 'Loading...',
+            x: Math.round(x),
+            y: Math.round(y),
+            width: 500,
+            height: 130,
+            show: false,
+            webPreferences: {
+                nodeIntegration: true,
+                contextIsolation: false
+            }
+        });
+        searchWin.loadFile('search.html').then(() => {
+            searchWin.title = 'Find';
+        });
+
+        searchWin.once('ready-to-show', () => searchWin.show());
+
+        // Handler da busca
+        const doSearch = (event, { text, forward }) => {
+            if (!text) {
+                win.webContents.stopFindInPage('clearSelection');
+                return;
+            }
+            currentRequestId = win.webContents.findInPage(text, {
+                forward,
+                matchCase: false
+            });
+        };
+
+        ipcMain.on('search', doSearch);
+
+        const foundHandler = (event, result) => {
+            if (result.requestId === currentRequestId) {
+                searchWin.webContents.send('search-result', result);
+            }
+        };
+        win.webContents.on('found-in-page', foundHandler);
+
+        const execQuietly = (fn) => {
+            try {
+                fn();
+            }catch (e) {
+                //
+            }
+        }
+
+        const cleanup = () => {
+            execQuietly(() => ipcMain.removeListener('search', doSearch));
+            execQuietly(() => win.webContents.removeListener('found-in-page', foundHandler));
+            execQuietly(() => win.webContents.stopFindInPage('clearSelection'));
+            execQuietly(() => ipcMain.removeAllListeners('search-cancel'));
+        };
+
+        ipcMain.once('search-cancel', () => {
+            searchWin.close();
+        });
+
+        win.once('closed', () => {
+            searchWin.destroy();
+            cleanup();
+        });
+
+        searchWin.once('closed', () => {
+            searchWin.destroy();
+            cleanup();
+        });
+    }
+
     let aboutWindow = null;
 
     async function createAboutWindow() {
@@ -39,6 +118,7 @@ const createWindow = () => {
 
             aboutWindow.removeMenu();
 
+            // noinspection ES6MissingAwait
             aboutWindow.loadFile(path.join(__dirname, 'about.html'));
             aboutWindow.webContents.on('dom-ready', () => {
                 aboutWindow.webContents.executeJavaScript(`document.getElementById('version').innerHTML = '${app.getVersion()}';`);
@@ -94,7 +174,7 @@ const createWindow = () => {
                     label: 'Refresh',
                     accelerator: "CmdOrCtrl+R",
                     click: async () => {
-                        await win.reload();
+                        win.reload();
                     }
                 },
                 {type: 'separator'},
@@ -105,6 +185,22 @@ const createWindow = () => {
                         app.quit();
                     }
                 }
+            ]
+        },
+        {
+            label: 'Edit',
+            submenu: [
+                {
+                    label: 'Find...',
+                    accelerator: "CommandOrControl+F",
+                    click() {
+                        execSearch();
+                    }
+                },
+                { type: 'separator' },
+                { role: 'copy' },
+                { role: 'cut' },
+                { role: 'paste' }
             ]
         },
         {
@@ -155,6 +251,7 @@ const createWindow = () => {
             if (typeof e !== "undefined" && e !== null) {
                 e.preventDefault();
             }
+            // noinspection JSIgnoredPromiseFromCall
             shell.openExternal(url);
             return {action: 'deny'};
         } else {

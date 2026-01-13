@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body { font-family: -apple-system, sans-serif; padding: 2px; width: 100%; margin: 0; overflow: hidden;}
+        input { width: 470px; padding: 10px; font-size: 16px; }
+        button { margin-left: 10px; padding: 8px 16px; }
+        #matches { color: #666; font-size: 14px; margin-top: 10px; }
+    </style>
+</head>
+<body>
+<input id="searchInput" type="text" autofocus placeholder="Find (Ctrl+F)">
+<br/>
+<br/>
+<center>
+    <button id="prev">←</button>
+    <button id="next">→</button>
+    <button id="cancel">Cancel</button><br/>
+    <div id="matches">0 / 0</div>
+</center>
+<script>
+    const { ipcRenderer } = require('electron');
+    let requestId = 0;
+    let currentText = '';
+
+    const input = document.getElementById('searchInput');
+    const prevBtn = document.getElementById('prev');
+    const nextBtn = document.getElementById('next');
+    const cancelBtn = document.getElementById('cancel');
+    const matchesEl = document.getElementById('matches');
+
+    input.addEventListener('input', (e) => {
+        currentText = e.target.value;
+        if (currentText) {
+            ipcRenderer.send('search', { text: currentText, forward: true });
+        } else {
+            ipcRenderer.send('search-stop');
+        }
+    });
+
+    prevBtn.onclick = () => ipcRenderer.send('search', { text: currentText, forward: false });
+    nextBtn.onclick = () => ipcRenderer.send('search', { text: currentText, forward: true });
+    cancelBtn.onclick = () => ipcRenderer.send('search-cancel');
+
+    ipcRenderer.on('search-result', (event, result) => {
+        matchesEl.textContent = `${result.activeMatchOrdinal} / ${result.matches}`;
+    });
+    // No final do <script> do search.html
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') ipcRenderer.send('search-cancel');
+        if (e.ctrlKey && e.key === 'Enter') document.getElementById('next').click();
+    });
+
+</script>
+</body>
+</html>
