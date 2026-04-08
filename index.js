@@ -2,11 +2,36 @@ import {app, BrowserWindow, Menu, MenuItem, ipcMain, nativeTheme, shell, clipboa
 import windowStateKeeper from 'electron-window-state';
 import path from 'path';
 import {fileURLToPath} from "url";
+import fs from 'fs';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+const CONFIG_FILE = path.join(app.getPath('userData'), 'config.json');
+const DEFAULT_URL = 'https://perplexity.ai';
+
+function loadConfig() {
+    try {
+        if (fs.existsSync(CONFIG_FILE)) {
+            const data = JSON.parse(fs.readFileSync(CONFIG_FILE, 'utf8'));
+            return data;
+        }
+    } catch (e) {
+        // ignore
+    }
+    return {};
+}
+
+function saveConfig(data) {
+    try {
+        fs.writeFileSync(CONFIG_FILE, JSON.stringify(data, null, 2), 'utf8');
+    } catch (e) {
+        // ignore
+    }
+}
+
 const createWindow = () => {
+    const config = loadConfig();
     let mainWindowState = windowStateKeeper({
         defaultWidth: 1000,
         defaultHeight: 800
@@ -159,14 +184,16 @@ const createWindow = () => {
                     label: 'Perplexity.AI',
                     accelerator: "CmdOrCtrl+P",
                     click: async () => {
+                        saveConfig({...loadConfig(), lastUrl: 'https://perplexity.ai'});
                         await win.loadURL("https://perplexity.ai");
                     }
                 },
                 {
-                    label: 'Perplexity Labs',
+                    label: 'Claude.AI',
                     accelerator: "CmdOrCtrl+L",
                     click: async () => {
-                        await win.loadURL("https://labs.perplexity.ai");
+                        saveConfig({...loadConfig(), lastUrl: 'https://claude.ai/'});
+                        await win.loadURL("https://claude.ai/");
                     }
                 },
                 {type: 'separator'},
@@ -245,6 +272,7 @@ const createWindow = () => {
         if (
             url !== null &&
             url.indexOf("perplexity.ai") < 0 &&
+            url.indexOf("claude.ai") < 0 &&
             url.indexOf("accounts.google.com") < 0 &&
             url.indexOf("appleid.apple.com") < 0
         ) {
@@ -325,7 +353,7 @@ const createWindow = () => {
     });
 
     mainWindowState.manage(win);
-    win.loadURL("https://perplexity.ai");
+    win.loadURL(config.lastUrl || DEFAULT_URL);
 }
 
 app.whenReady().then(() => {

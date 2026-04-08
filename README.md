@@ -3,23 +3,24 @@
   <img src="./img/icon.svg" width="128" alt="Simplexity Logo" width=600px>
 </p>
 
-<h1 align="center">:rocket: Simplexity - The simple Perplexity AI Desktop App</h1>
+<h1 align="center">:rocket: Simplexity - Simple AI Desktop App</h1>
 
 ---
 
 <p align="center">
-  The non-nonsense simple desktop app for Perplexity AI. It's just work, no magic, no tray, no scripts injected and nothing obfuscated.
+  The non-nonsense simple desktop app for Perplexity and Claude AI. It's just work, no magic, no tray, no scripts injected and nothing obfuscated.
 </p>
 
 <p align="center">
-  <img src="./img/screenshot.png" alt="App Screenshot">
+  <img src="./img/screenshot-chats.png" alt="App Screenshot">
 </p>
 
 ---
 
 ## :sparkles: Features
 
-- **Just works**: Open Perplexity and is just it.
+- **Just works**: Open Perplexity or Claude and is just it.
+- **Multiple AIs**: Switch between Perplexity.AI and Claude.AI from the menu (or use `Ctrl+P` / `Ctrl+L`). Your last selection is remembered across sessions.
 - **Persistent window state**: If the window is on primary display, stay on primary. If the window is small, stay small. Simple.
 - **No magical tray**: Why still running? Just open when you want and close when you want.
 
@@ -70,7 +71,7 @@ Download Simplexity from `Flathub`. Or if you prefer, use the `AppImage`.
 This project is licensed under the BSD3 License.
 
 ---
-> **Note**: This application is not affiliated with the official Perplexity AI project but is an independent effort to bring it to your desktop.
+> **Note**: This application is not affiliated with Perplexity AI or Anthropic (Claude), but is an independent effort to bring them to your desktop.
 
 ---
 

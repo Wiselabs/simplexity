@@ -10,7 +10,7 @@
         <name>Wiselabs Software</name>
     </developer>
     <description>
-        <p>The non-nonsense simple desktop app for Perplexity AI. It's just work, no magic, no tray, no scripts injected and nothing obfuscated.</p>
+        <p>The non-nonsense simple desktop app for Perplexity and Claude AI. It's just work, no magic, no tray, no scripts injected and nothing obfuscated.</p>
         <p>
             This simple project was motivated by the fact that when developers searched for a simple Desktop application for Perplexity.AI,
             they came across "fake open-source" applications, meaning there were obfuscated codes injected and suspicious traffic when running them.
@@ -19,7 +19,7 @@
         </p>
         <ul>
             <li>Safe;</li>
-            <li>Can navigate between Perplexity.AI and Perplexity Labs by menu;</li>
+            <li>Can navigate between Perplexity.AI and Claude.AI by menu;</li>
             <li>Just works.</li>
         </ul>
     </description>
@@ -47,6 +47,14 @@
     <url type="bugtracker">https://github.com/Wiselabs/simplexity/issues</url>
     <url type="donation">https://buymeacoffee.com/franklin8</url>
     <releases>
+        <release version="1.3.0" date="2026-04-08">
+            <description>
+                <ul>
+                    <li>Added Claude.AI as an alternative AI (replaces Perplexity Labs);</li>
+                    <li>Selected AI is now persisted across sessions.</li>
+                </ul>
+            </description>
+        </release>
         <release version="1.2.0" date="2026-01-13">
             <description>
                 <ul>
