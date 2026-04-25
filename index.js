@@ -1,92 +1,115 @@
-import {app, BrowserWindow, Menu, MenuItem, ipcMain, nativeTheme, shell, clipboard} from 'electron';
+import { app, BaseWindow, WebContentsView, BrowserWindow, Menu, MenuItem, ipcMain, nativeTheme, shell, clipboard } from 'electron';
 import windowStateKeeper from 'electron-window-state';
 import path from 'path';
-import {fileURLToPath} from "url";
+import { fileURLToPath } from 'url';
 import fs from 'fs';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const CONFIG_FILE = path.join(app.getPath('userData'), 'config.json');
-const DEFAULT_URL = 'https://perplexity.ai';
+const URLS = {
+    perplexity: 'https://perplexity.ai',
+    claude: 'https://claude.ai/'
+};
 
 function loadConfig() {
     try {
         if (fs.existsSync(CONFIG_FILE)) {
-            const data = JSON.parse(fs.readFileSync(CONFIG_FILE, 'utf8'));
-            return data;
+            return JSON.parse(fs.readFileSync(CONFIG_FILE, 'utf8'));
         }
-    } catch (e) {
-        // ignore
-    }
+    } catch (e) {}
     return {};
 }
 
 function saveConfig(data) {
     try {
         fs.writeFileSync(CONFIG_FILE, JSON.stringify(data, null, 2), 'utf8');
-    } catch (e) {
-        // ignore
-    }
+    } catch (e) {}
 }
 
 const createWindow = () => {
     const config = loadConfig();
-    let mainWindowState = windowStateKeeper({
-        defaultWidth: 1000,
-        defaultHeight: 800
-    });
-    const win = new BrowserWindow({
+
+    const mainWindowState = windowStateKeeper({ defaultWidth: 1000, defaultHeight: 800 });
+
+    const win = new BaseWindow({
         x: mainWindowState.x,
         y: mainWindowState.y,
         width: mainWindowState.width,
         height: mainWindowState.height,
-        webPreferences: {
-            partition: 'persist:simplexity',
-            spellcheck: true
-        }
+        icon: path.join(__dirname, 'img/icon.png'),
     });
+    win.setTitle(app.getName() + ' - ' + app.getVersion());
 
-    let currentRequestId = 0;  // Para rastrear
+    const views = {
+        perplexity: new WebContentsView({
+            webPreferences: { partition: 'persist:simplexity', spellcheck: true }
+        }),
+        claude: new WebContentsView({
+            webPreferences: { partition: 'persist:simplexity', spellcheck: true }
+        })
+    };
+
+    win.contentView.addChildView(views.perplexity);
+    win.contentView.addChildView(views.claude);
+
+    let activeKey = config.lastUrl === URLS.claude ? 'claude' : 'perplexity';
+
+    const fitActiveView = () => {
+        const { width, height } = win.getContentBounds();
+        views[activeKey].setBounds({ x: 0, y: 0, width, height });
+    };
+
+    const switchTo = (key) => {
+        views[activeKey].setBounds({ x: 0, y: 0, width: 0, height: 0 });
+        activeKey = key;
+        fitActiveView();
+        saveConfig({ ...loadConfig(), lastUrl: URLS[key] });
+    };
+
+    // Initialize bounds: active view fills window, inactive is 0x0
+    const { width: initW, height: initH } = win.getContentBounds();
+    for (const [key, view] of Object.entries(views)) {
+        view.setBounds(key === activeKey
+            ? { x: 0, y: 0, width: initW, height: initH }
+            : { x: 0, y: 0, width: 0, height: 0 }
+        );
+    }
+
+    win.on('resize', fitActiveView);
+
+    views.perplexity.webContents.loadURL(URLS.perplexity);
+    views.claude.webContents.loadURL(URLS.claude);
+
+    // --- Search (Ctrl+F) ---
+    let currentRequestId = 0;
 
     const execSearch = () => {
+        const activeWc = views[activeKey].webContents;
         const parentBounds = win.getBounds();
-        const searchWidth = 450;
-        const searchHeight = 140;
-        const x = parentBounds.x + (parentBounds.width - searchWidth) / 2;
-        const y = parentBounds.y + (parentBounds.height - searchHeight) / 2;
-        const searchWin = new BrowserWindow({
-            parent: win,
-            modal: true,
-            title: 'Loading...',
-            x: Math.round(x),
-            y: Math.round(y),
-            width: 500,
-            height: 130,
-            show: false,
-            webPreferences: {
-                nodeIntegration: true,
-                contextIsolation: false
-            }
-        });
-        searchWin.loadFile('search.html').then(() => {
-            searchWin.title = 'Find';
-        });
+        const searchWidth = 500;
+        const searchHeight = 130;
 
+        const searchWin = new BrowserWindow({
+            x: Math.round(parentBounds.x + (parentBounds.width - searchWidth) / 2),
+            y: Math.round(parentBounds.y + (parentBounds.height - searchHeight) / 2),
+            width: searchWidth,
+            height: searchHeight,
+            show: false,
+            minimizable: false,
+            maximizable: false,
+            resizable: false,
+            webPreferences: { nodeIntegration: true, contextIsolation: false }
+        });
+        searchWin.removeMenu();
+        searchWin.loadFile('search.html').then(() => { searchWin.title = 'Find'; });
         searchWin.once('ready-to-show', () => searchWin.show());
 
-        // Handler da busca
         const doSearch = (event, { text, forward }) => {
-            if (!text) {
-                win.webContents.stopFindInPage('clearSelection');
-                return;
-            }
-            currentRequestId = win.webContents.findInPage(text, {
-                forward,
-                matchCase: false
-            });
+            if (!text) { activeWc.stopFindInPage('clearSelection'); return; }
+            currentRequestId = activeWc.findInPage(text, { forward, matchCase: false });
         };
-
         ipcMain.on('search', doSearch);
 
         const foundHandler = (event, result) => {
@@ -94,268 +117,150 @@ const createWindow = () => {
                 searchWin.webContents.send('search-result', result);
             }
         };
-        win.webContents.on('found-in-page', foundHandler);
+        activeWc.on('found-in-page', foundHandler);
 
-        const execQuietly = (fn) => {
-            try {
-                fn();
-            }catch (e) {
-                //
-            }
-        }
-
+        const execQuietly = (fn) => { try { fn(); } catch (e) {} };
         const cleanup = () => {
             execQuietly(() => ipcMain.removeListener('search', doSearch));
-            execQuietly(() => win.webContents.removeListener('found-in-page', foundHandler));
-            execQuietly(() => win.webContents.stopFindInPage('clearSelection'));
+            execQuietly(() => activeWc.removeListener('found-in-page', foundHandler));
+            execQuietly(() => activeWc.stopFindInPage('clearSelection'));
             execQuietly(() => ipcMain.removeAllListeners('search-cancel'));
         };
 
-        ipcMain.once('search-cancel', () => {
-            searchWin.close();
-        });
+        ipcMain.once('search-cancel', () => searchWin.close());
+        win.once('closed', () => { searchWin.destroy(); cleanup(); });
+        searchWin.once('closed', cleanup);
+    };
 
-        win.once('closed', () => {
-            searchWin.destroy();
-            cleanup();
-        });
-
-        searchWin.once('closed', () => {
-            searchWin.destroy();
-            cleanup();
-        });
-    }
-
+    // --- About window ---
     let aboutWindow = null;
 
-    async function createAboutWindow() {
-        // Define our main window size
+    const createAboutWindow = async () => {
         if (aboutWindow == null) {
             aboutWindow = new BrowserWindow({
-                width: 450,
-                height: 550,
-                show: false,
-                minimizable: false,
-                maximizable: false,
-                parent: win
+                width: 450, height: 550,
+                show: false, minimizable: false, maximizable: false,
             });
             aboutWindow.setIcon(path.join(__dirname, 'img/icon.png'));
-
             aboutWindow.removeMenu();
-
-            // noinspection ES6MissingAwait
             aboutWindow.loadFile(path.join(__dirname, 'about.html'));
             aboutWindow.webContents.on('dom-ready', () => {
                 aboutWindow.webContents.executeJavaScript(`document.getElementById('version').innerHTML = '${app.getVersion()}';`);
                 aboutWindow.show();
             });
-            aboutWindow.webContents.setWindowOpenHandler(({url}) => {
-                // open url in a browser and prevent default
+            aboutWindow.webContents.setWindowOpenHandler(({ url }) => {
                 shell.openExternal(url);
-                return {action: 'deny'};
+                return { action: 'deny' };
             });
-            aboutWindow.on('closed', () => {
-                aboutWindow = null;
-            });
+            aboutWindow.on('closed', () => { aboutWindow = null; });
         } else {
             aboutWindow.focus();
         }
-    }
+    };
 
+    // --- Dark mode IPC ---
     ipcMain.handle('dark-mode:toggle', () => {
-        if (nativeTheme.shouldUseDarkColors) {
-            nativeTheme.themeSource = 'light';
-        } else {
-            nativeTheme.themeSource = 'dark';
-        }
+        nativeTheme.themeSource = nativeTheme.shouldUseDarkColors ? 'light' : 'dark';
         return nativeTheme.shouldUseDarkColors;
     });
+    ipcMain.handle('dark-mode:system', () => { nativeTheme.themeSource = 'system'; });
 
-    ipcMain.handle('dark-mode:system', () => {
-        nativeTheme.themeSource = 'system';
-    });
+    // --- URL routing + context menu on each view ---
+    const openNewUrl = (url, e) => {
+        const allowed = ['perplexity.ai', 'claude.ai', 'accounts.google.com', 'appleid.apple.com'];
+        if (url && !allowed.some(h => url.includes(h))) {
+            if (e) e.preventDefault();
+            shell.openExternal(url);
+            return { action: 'deny' };
+        }
+        return { action: 'allow' };
+    };
 
-    // Menu
-    const appMenu = [
+    for (const view of Object.values(views)) {
+        const wc = view.webContents;
+
+        wc.on('will-navigate', (e, url) => openNewUrl(url, e));
+        wc.setWindowOpenHandler(({ url }) => openNewUrl(url));
+
+        wc.on('context-menu', (event, params) => {
+            const menu = Menu.buildFromTemplate([
+                { label: 'Copy',      role: 'copy',  enabled: params.selectionText.trim().length > 0 },
+                { label: 'Cut',       role: 'cut',   enabled: params.editFlags.canCut },
+                { label: 'Paste',     role: 'paste', enabled: params.editFlags.canPaste },
+                { label: 'Copy Link', visible: !!params.linkURL, click: () => clipboard.writeText(params.linkURL) }
+            ]);
+            if (params.dictionarySuggestions?.length > 0) {
+                menu.append(new MenuItem({ type: 'separator' }));
+                for (const suggestion of params.dictionarySuggestions) {
+                    menu.append(new MenuItem({
+                        label: suggestion,
+                        click: () => wc.replaceMisspelling(suggestion)
+                    }));
+                }
+            }
+            if (params.misspelledWord) {
+                menu.append(new MenuItem({
+                    label: 'Add to dictionary',
+                    click: () => wc.session.addWordToSpellCheckerDictionary(params.misspelledWord)
+                }));
+            }
+            menu.popup({ window: win });
+        });
+    }
+
+    // --- Application menu ---
+    Menu.setApplicationMenu(Menu.buildFromTemplate([
         {
             label: 'Simplexity',
             submenu: [
-                {
-                    label: 'Perplexity.AI',
-                    accelerator: "CmdOrCtrl+P",
-                    click: async () => {
-                        saveConfig({...loadConfig(), lastUrl: 'https://perplexity.ai'});
-                        await win.loadURL("https://perplexity.ai");
-                    }
-                },
-                {
-                    label: 'Claude.AI',
-                    accelerator: "CmdOrCtrl+L",
-                    click: async () => {
-                        saveConfig({...loadConfig(), lastUrl: 'https://claude.ai/'});
-                        await win.loadURL("https://claude.ai/");
-                    }
-                },
-                {type: 'separator'},
-                {
-                    label: 'Refresh',
-                    accelerator: "CmdOrCtrl+R",
-                    click: async () => {
-                        win.reload();
-                    }
-                },
-                {type: 'separator'},
-                {
-                    label: 'Quit',
-                    accelerator: "CmdOrCtrl+Q",
-                    click() {
-                        app.quit();
-                    }
-                }
+                { label: 'Perplexity.AI', accelerator: 'CmdOrCtrl+P', click: () => switchTo('perplexity') },
+                { label: 'Claude.AI',     accelerator: 'CmdOrCtrl+L', click: () => switchTo('claude') },
+                { type: 'separator' },
+                { label: 'Refresh', accelerator: 'CmdOrCtrl+R', click: () => views[activeKey].webContents.reload() },
+                { type: 'separator' },
+                { label: 'Quit', accelerator: 'CmdOrCtrl+Q', click: () => app.quit() }
             ]
         },
         {
             label: 'Edit',
             submenu: [
-                {
-                    label: 'Find...',
-                    accelerator: "CommandOrControl+F",
-                    click() {
-                        execSearch();
-                    }
-                },
+                { label: 'Find...', accelerator: 'CommandOrControl+F', click: () => execSearch() },
                 { type: 'separator' },
-                { role: 'copy' },
-                { role: 'cut' },
-                { role: 'paste' }
+                { role: 'copy' }, { role: 'cut' }, { role: 'paste' }
             ]
         },
         {
             label: 'View',
             submenu: [
-                { role: 'zoomIn' },
-                { role: 'zoomOut' },
+                {
+                    label: 'Zoom In', accelerator: 'CmdOrCtrl+=',
+                    click: () => { const wc = views[activeKey].webContents; wc.setZoomLevel(wc.getZoomLevel() + 0.5); }
+                },
+                {
+                    label: 'Zoom Out', accelerator: 'CmdOrCtrl+-',
+                    click: () => { const wc = views[activeKey].webContents; wc.setZoomLevel(wc.getZoomLevel() - 0.5); }
+                },
                 { type: 'separator' },
-                { role: 'resetZoom' }
+                {
+                    label: 'Reset Zoom', accelerator: 'CmdOrCtrl+0',
+                    click: () => views[activeKey].webContents.setZoomLevel(0)
+                }
             ]
         },
         {
             label: 'Help',
             submenu: [
-                {
-                    label: 'About',
-                    accelerator: "F1",
-                    click: async () => {
-                        await createAboutWindow();
-                    }
-                },
-                {
-                    label: 'Support',
-                    accelerator: "CmdOrCtrl+H",
-                    click: async () => {
-                        await shell.openExternal('https://github.com/Wiselabs/simplexity/issues')
-                    }
-                },
-                {type: 'separator'},
-                {
-                    label: 'Quit',
-                    accelerator: "CmdOrCtrl+Q",
-                    click() {
-                        app.quit();
-                    }
-                }
+                { label: 'About',   accelerator: 'F1',          click: createAboutWindow },
+                { label: 'Support', accelerator: 'CmdOrCtrl+H', click: () => shell.openExternal('https://github.com/dieg000w/simplexity-enhanced/issues') },
+                { type: 'separator' },
+                { label: 'Quit', accelerator: 'CmdOrCtrl+Q', click: () => app.quit() }
             ]
         }
-    ];
-
-    const openNewUrl = function (url, e) {
-        if (
-            url !== null &&
-            url.indexOf("perplexity.ai") < 0 &&
-            url.indexOf("claude.ai") < 0 &&
-            url.indexOf("accounts.google.com") < 0 &&
-            url.indexOf("appleid.apple.com") < 0
-        ) {
-            if (typeof e !== "undefined" && e !== null) {
-                e.preventDefault();
-            }
-            // noinspection JSIgnoredPromiseFromCall
-            shell.openExternal(url);
-            return {action: 'deny'};
-        } else {
-            return {action: 'allow'};
-        }
-    }
-
-    const handleRedirect = (e, url) => {
-        openNewUrl(url, e);
-    }
-
-    Menu.setApplicationMenu(Menu.buildFromTemplate(appMenu));
-    win.setIcon(path.join(__dirname, 'img/icon.png'));
-    win.setTitle(app.getName() + ' - ' + app.getVersion());
-
-    win.on('did-start-navigation', function () {
-        session.defaultSession.cookies.flushStore();
-    });
-
-    win.on('did-navigate', function () {
-        session.defaultSession.cookies.flushStore();
-    });
-
-    win.webContents.on('context-menu', (event, params) => {
-        const menu = Menu.buildFromTemplate([
-            {
-                label: 'Copy',
-                role: 'copy',
-                enabled: params.selectionText.trim().length > 0,
-            },
-            {
-                label: 'Cut',
-                role: 'cut',
-                enabled: params.editFlags.canCut,
-            },
-            {
-                label: 'Paste',
-                role: 'paste',
-                enabled: params.editFlags.canPaste,
-            },
-            {
-                label: 'Copy Link',
-                visible: !!params.linkURL,
-                click: () => clipboard.writeText(params.linkURL)
-            }
-        ]);
-        if(params.dictionarySuggestions && params.dictionarySuggestions.length > 0) {
-            menu.append(new MenuItem({type: 'separator'}));
-            for (const suggestion of params.dictionarySuggestions) {
-                menu.append(new MenuItem({
-                    label: suggestion,
-                    click: () => win.webContents.replaceMisspelling(suggestion)
-                }))
-            }
-        }
-        if (params.misspelledWord) {
-            menu.append(
-                new MenuItem({
-                    label: 'Add to dictionary',
-                    click: () => myWindow.webContents.session.addWordToSpellCheckerDictionary(params.misspelledWord)
-                })
-            )
-        }
-
-        menu.popup(win);
-    });
-    win.webContents.on('will-navigate', handleRedirect);
-    win.webContents.on('new-window', handleRedirect);
-    win.webContents.setWindowOpenHandler(({url}) => {
-        return openNewUrl(url);
-    });
+    ]));
 
     mainWindowState.manage(win);
-    win.loadURL(config.lastUrl || DEFAULT_URL);
-}
+};
 
 app.whenReady().then(() => {
-    createWindow()
+    createWindow();
 });
